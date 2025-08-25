@@ -1,151 +1,206 @@
-E-commerce API
-This is a RESTful API for an e-commerce application built with Node.js, Express, PostgreSQL, and Passport.js. It supports user registration and login, product management, cart operations, checkout, and order history. The API is documented using Swagger and includes input validation and role-based access control (admin/user roles).
-Features
+E-commerce REST API
+A fully-featured RESTful API for an e-commerce platform built with Node.js, Express, PostgreSQL, and JWT authentication.
 
-User Management: Register, login, view, and update user accounts.
-Product Management: CRUD operations for products (admin-only for create/update/delete).
-Cart Operations: Create carts, add items, view cart, and checkout.
-Order Management: View order history and order details.
-Authentication: JWT-based authentication with Passport.js local strategy.
-Authorization: Admin-only access for product management.
-Documentation: Swagger UI for API documentation at /api-docs.
+🌟 Features
+User Authentication: JWT-based registration and login system
 
+Product Management: Full CRUD operations with admin authorization
+
+Shopping Cart: Complete cart functionality with item management
+
+Order Processing: Checkout system and order history
+
+Role-Based Access Control: Different permissions for admins and users
+
+API Documentation: Comprehensive Swagger/OpenAPI documentation
+
+Input Validation: Robust validation for all endpoints
+
+🚀 Quick Start
 Prerequisites
-
 Node.js (v16 or higher)
+
 PostgreSQL (v12 or higher)
-Git
-A GitHub account (for repository hosting)
+
+npm or yarn
 
 Installation
+Clone the repository
 
-Clone the Repository:
+bash
 git clone https://github.com/ifeadeagbo/ecommerce-api.git
 cd ecommerce-api
+Install dependencies
 
-
-Install Dependencies:
+bash
 npm install
+Set up environment variables
 
+bash
+# Create .env file from example
+cp .env.example .env
 
-Set Up Environment Variables:
-
-Create a .env file in the root directory based on the example below:
-DATABASE_URL=postgres://postgres:your_password@localhost:5432/ecommerce
+# Edit with your configuration
+DATABASE_URL=postgres://username:password@localhost:5432/ecommerce
 PORT=3000
-JWT_SECRET=your_jwt_secret_key
+JWT_SECRET=your_very_secure_jwt_secret_here
+Set up the database
 
-
-Replace your_password with your PostgreSQL password and your_jwt_secret_key with a secure random string (e.g., generate using openssl rand -base64 32).
-
-
-
-Set Up PostgreSQL Database:
-
-Create the database and tables by running the init.sql script:
+bash
+# Initialize the database schema
 psql -U postgres -f init.sql
+Start the server
 
+bash
+# Development mode with auto-restart
+npm run dev
 
-Optionally, add a test admin user:
-INSERT INTO users (username, password, email, role)
-VALUES ('admin', '$2b$10$your_bcrypt_hash', 'admin@example.com', 'admin');
-
-
-Generate a bcrypt hash for the password:
-const bcrypt = require('bcrypt');
-bcrypt.hash('admin_password', 10).then(hash => console.log(hash));
-
-
-
-
-
-
-
-Running the Application
-
-Start the Server:
+# Or production mode
 npm start
+Access API documentation
+Open your browser and navigate to http://localhost:3000/api-docs
 
+📚 API Documentation
+Interactive API documentation is available at /api-docs endpoint when the server is running. This provides:
 
-The server runs on http://localhost:3000 (or the port specified in .env).
+Complete endpoint descriptions
 
+Request/response examples
 
-Access API Documentation:
+Interactive testing capability
 
-Open http://localhost:3000/api-docs in a browser to view the Swagger UI.
+Schema definitions
 
+🔐 Authentication
+This API uses JWT (JSON Web Tokens) for authentication. Most endpoints require including a token in the Authorization header:
 
+text
+Authorization: Bearer <your_jwt_token>
+Getting Started with Authentication
+Register a new user
 
-API Endpoints
-Authentication
+bash
+curl -X POST http://localhost:3000/users/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "password123",
+    "email": "test@example.com"
+  }'
+Login to get JWT token
 
-POST /users/register: Register a new user (username, password, email).
-POST /users/login: Login and receive a JWT token.
+bash
+curl -X POST http://localhost:3000/users/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "password123"
+  }'
+Use the token in subsequent requests
 
-Users
-
-GET /users: Get all users (authenticated).
-GET /users/{userId}: Get a user by ID (authenticated).
-PUT /users/{userId}: Update user details (authenticated).
-
-Products
-
-GET /products?category={categoryId}: Get products, optionally filtered by category.
-GET /products/{productId}: Get a product by ID.
-POST /products: Create a product (admin only).
-PUT /products/{productId}: Update a product (admin only).
-DELETE /products/{productId}: Delete a product (admin only).
-
-Cart
-
-POST /cart: Create a new cart (authenticated).
-POST /cart/{cartId}: Add an item to a cart (authenticated).
-GET /cart/{cartId}: Get cart details (authenticated).
-POST /cart/{cartId}/checkout: Checkout a cart, creating an order (authenticated).
-
-Orders
-
-GET /orders: Get all orders for a user (authenticated).
-GET /orders/{orderId}: Get order details (authenticated).
-
-Authentication
-
-Protected endpoints require a JWT in the Authorization header: Bearer <token>.
-Obtain a token via POST /users/login.
-
-Testing
-
-Use tools like Postman or curl to test endpoints.
-
-Example: Register a user:
-curl -X POST http://localhost:3000/users/register -H "Content-Type: application/json" -d '{"username":"testuser","password":"password123","email":"test@example.com"}'
-
-
-Example: Login and get a token:
-curl -X POST http://localhost:3000/users/login -H "Content-Type: application/json" -d '{"username":"testuser","password":"password123"}'
-
-
-
-Project Structure
+bash
+curl -X GET http://localhost:3000/users/profile \
+  -H "Authorization: Bearer <your_jwt_token>"
+🗂️ API Endpoints
+Authentication Endpoints
+Method	Endpoint	Description	Auth Required
+POST	/users/register	Register a new user	No
+POST	/users/login	Login and receive JWT token	No
+User Endpoints
+Method	Endpoint	Description	Auth Required
+GET	/users	Get all users	Yes (Admin)
+GET	/users/:userId	Get user by ID	Yes
+PUT	/users/:userId	Update user details	Yes
+Product Endpoints
+Method	Endpoint	Description	Auth Required
+GET	/products	Get all products	No
+GET	/products?category=:id	Filter products by category	No
+GET	/products/:productId	Get product details	No
+POST	/products	Create a new product	Yes (Admin)
+PUT	/products/:productId	Update a product	Yes (Admin)
+DELETE	/products/:productId	Delete a product	Yes (Admin)
+Cart Endpoints
+Method	Endpoint	Description	Auth Required
+POST	/cart	Create a new cart	Yes
+POST	/cart/:cartId	Add item to cart	Yes
+GET	/cart/:cartId	Get cart contents	Yes
+POST	/cart/:cartId/checkout	Checkout cart	Yes
+Order Endpoints
+Method	Endpoint	Description	Auth Required
+GET	/orders	Get user's order history	Yes
+GET	/orders/:orderId	Get order details	Yes
+🏗️ Project Structure
+text
 ecommerce-api/
-├── controllers/        # Request handlers for each resource
-├── middleware/         # Authentication and authorization middleware
-├── routes/             # Express route definitions
-├── .env                # Environment variables (not tracked)
-├── .gitignore          # Git ignore rules
-├── db.js               # PostgreSQL connection setup
-├── init.sql            # Database schema
-├── package.json        # Project dependencies and scripts
-├── server.js           # Main server file
-├── swagger.yaml        # API documentation
+├── controllers/          # Route controllers
+│   ├── authController.js
+│   ├── userController.js
+│   ├── productController.js
+│   ├── cartController.js
+│   └── orderController.js
+├── middleware/           # Custom middleware
+│   ├── auth.js          # Authentication middleware
+│   ├── validation.js    # Input validation
+│   └── errorHandler.js  # Error handling
+├── routes/              # Express route definitions
+│   ├── auth.js
+│   ├── users.js
+│   ├── products.js
+│   ├── cart.js
+│   └── orders.js
+├── config/              # Configuration files
+│   └── database.js      # DB connection setup
+├── models/              # Database models
+├── utils/               # Utility functions
+├── init.sql             # Database schema
+├── swagger.yaml         # API documentation
+├── package.json
+└── server.js            # Application entry point
+🧪 Testing
+Run the test suite to verify everything is working correctly:
 
-Contributing
+bash
+# Run tests
+npm test
 
-Fork the repository and submit pull requests for improvements.
-Report issues via GitHub Issues.
+# Run tests with coverage report
+npm run test:coverage
+🐛 Troubleshooting
+Common issues and solutions:
 
-License
-ISC License
-Author
+Database connection errors
 
+Verify PostgreSQL is running
+
+Check DATABASE_URL in .env file
+
+Authentication issues
+
+Ensure JWT_SECRET is set in environment variables
+
+Verify token is included in Authorization header
+
+Port already in use
+
+Change PORT in .env file or stop other processes using port 3000
+
+🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+Fork the project
+
+Create your feature branch (git checkout -b feature/AmazingFeature)
+
+Commit your changes (git commit -m 'Add some AmazingFeature')
+
+Push to the branch (git push origin feature/AmazingFeature)
+
+Open a Pull Request
+
+📄 License
+This project is licensed under the ISC License - see the LICENSE file for details.
+
+👨‍💻 Author
 Ifeoluwa Adeagbo
+
+GitHub: @ifeadeagbo
